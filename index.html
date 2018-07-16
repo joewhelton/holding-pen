@@ -1,0 +1,138 @@
+<DOCTYPE html>
+
+<html>
+	<head>
+		<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+		<script src="./node_modules/jquery-ui-dist/jquery-ui.min.js"></script>
+		<script src="./js/jquery.ui-contextmenu.min.js"></script>
+		
+		<link href="./node_modules/jquery-ui-dist/jquery-ui.css" rel="stylesheet"/>
+		<script>
+			var clone = {};
+			
+			var selectedAssets = {
+				data: [],
+				add: function(asset){
+					this.data.push(asset);
+					this.updateList();
+				},
+				updateList: function(){
+					$('#dropTarget ul').html("");
+					for(var k = 0; k < this.data.length; k++){
+						$('#dropTarget ul').append("<li>" + this.data[k].company + "</li>");
+					}
+				}
+			};
+			
+			function Asset(id, company, contact, country){
+				this.id = id;
+				this.company = company;
+				this.contact = contact;
+				this.country = country;
+			}
+			
+			$(document).ready(function(){
+				console.log("Ready");
+				
+				$('#testTable>tbody>tr').draggable({
+					helper: "clone",
+					start: function(event, ui){
+						clone.tr = this;
+						clone.helper = ui.helper;
+					}
+				});
+				
+				$('#dropTarget').droppable({
+					accept: "tr",
+					tolerance: "touch",
+					drop: function(event, ui){
+						//alert($(clone.tr).attr('data-pk'));
+						var asset = new Asset(
+							$(clone.tr).attr('data-pk'),
+							$(clone.tr).find('td:nth-of-type(1)').html(),
+							$(clone.tr).find('td:nth-of-type(2)').html(),
+							$(clone.tr).find('td:nth-of-type(3)').html()
+						);
+						
+						selectedAssets.add(asset);
+						
+						$(clone.tr).remove();
+						$(clone.helper).remove();
+					}
+				});
+				
+				$('#testTable').contextmenu({
+					delegate: 'tbody>tr',
+					menu: [{
+						title: "Add to collection",
+						uiIcon: "ui-icon-copy",
+						action: function(event, ui){
+							console.log(ui);
+							var asset = new Asset(
+								$(ui.target).parent().attr('data-pk'),
+								$(ui.target).parent().find('td:nth-of-type(1)').html(),
+								$(ui.target).parent().find('td:nth-of-type(2)').html(),
+								$(ui.target).parent().find('td:nth-of-type(3)').html()
+							);
+							selectedAssets.add(asset);
+							$(ui.target).parent().remove();
+						}
+					}]
+					
+				});
+				
+			});
+			
+			
+			
+		</script>
+	</head>
+	<body>
+		<table id="testTable">
+			<thead>
+				<tr>
+					<th>Company</th>
+					<th>Contact</th>
+					<th>Country</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr data-pk="12345">
+					<td>Alfreds Futterkiste</td>
+					<td>Maria Anders</td>
+					<td>Germany</td>
+				</tr>
+				<tr data-pk="1122">
+					<td>Centro comercial Moctezuma</td>
+					<td>Francisco Chang</td>
+					<td>Mexico</td>
+				</tr>
+				<tr data-pk="4433">
+					<td>Ernst Handel</td>
+					<td>Roland Mendel</td>
+					<td>Austria</td>
+				</tr>
+				<tr data-pk="9966">
+					<td>Island Trading</td>
+					<td>Helen Bennett</td>
+					<td>UK</td>
+				</tr>
+				<tr data-pk="987654">
+					<td>Laughing Bacchus Winecellars</td>
+					<td>Yoshi Tannamuri</td>
+					<td>Canada</td>
+				</tr>
+				<tr data-pk="1001">
+					<td>Magazzini Alimentari Riuniti</td>
+					<td>Giovanni Rovelli</td>
+					<td>Italy</td>
+				</tr>
+			</tbody>
+		</table>
+		<div id="dropTarget" style="width: 200px; height: 300px; border: 1px solid red; float: right;">
+			<ul>
+			
+			</ul>
+		</div>
+	</body>
+</html>
